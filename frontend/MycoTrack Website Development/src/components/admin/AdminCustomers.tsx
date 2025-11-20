@@ -1,114 +1,96 @@
-import React, { useState } from 'react';
-import { UserCheck, Search, Filter, Eye, Ban, CheckCircle, Mail, Phone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UserCheck, Search, Filter, Ban, CheckCircle, Mail, Phone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 interface Customer {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  totalOrders: number;
-  totalSpent: number;
-  joinDate: string;
-  status: 'active' | 'inactive' | 'banned';
+  phoneNumber: string;
+  address: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'suspended';
+  createdAt: string;
+  profilePhoto?: string;
+  balance?: number;
 }
 
-const mockCustomers: Customer[] = [
-  {
-    id: '1',
-    name: 'Toko Segar Jaya',
-    email: 'segarjaya@gmail.com',
-    phone: '081234567890',
-    totalOrders: 24,
-    totalSpent: 12500000,
-    joinDate: '2024-08-15',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Warung Ibu Siti',
-    email: 'ibusiti@gmail.com',
-    phone: '082345678901',
-    totalOrders: 18,
-    totalSpent: 8900000,
-    joinDate: '2024-09-01',
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Restaurant Nusantara',
-    email: 'nusantara@gmail.com',
-    phone: '083456789012',
-    totalOrders: 35,
-    totalSpent: 18700000,
-    joinDate: '2024-07-20',
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Ahmad Fauzi',
-    email: 'ahmadf@gmail.com',
-    phone: '084567890123',
-    totalOrders: 5,
-    totalSpent: 1250000,
-    joinDate: '2024-10-10',
-    status: 'active'
-  },
-  {
-    id: '5',
-    name: 'Siti Nurhaliza',
-    email: 'siti.nur@gmail.com',
-    phone: '085678901234',
-    totalOrders: 2,
-    totalSpent: 450000,
-    joinDate: '2024-10-28',
-    status: 'inactive'
-  }
-];
-
 export const AdminCustomers: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const navigate = useNavigate();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
-  const handleToggleStatus = (customerId: string, newStatus: 'active' | 'banned') => {
-    setCustomers(customers.map(c => 
-      c.id === customerId ? { ...c, status: newStatus } : c
-    ));
-    toast.success(`Customer berhasil ${newStatus === 'banned' ? 'diblokir' : 'diaktifkan'}!`);
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/admin/users/customers`);
+      if (!response.ok) throw new Error('Failed to fetch customers');
+      const data = await response.json();
+      setCustomers(data.customers || []);
+    } catch (error: any) {
+      console.error('Error fetching customers:', error);
+      toast.error('Gagal memuat data customer');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (customerId: string, newStatus: 'accepted' | 'suspended') => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/users/customers/${customerId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          adminEmail: 'admin'
+        })
+      });
+      if (!response.ok) throw new Error('Failed to update status');
+      toast.success(`Customer berhasil ${newStatus === 'suspended' ? 'dinonaktifkan' : 'diaktifkan'}!`);
+      fetchCustomers();
+    } catch (error: any) {
+      console.error('Error updating status:', error);
+      toast.error('Gagal mengupdate status customer');
+    }
   };
 
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchQuery.toLowerCase());
+                         customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         customer.phoneNumber.includes(searchQuery);
     const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(c => c.status === 'active').length;
-  const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0);
+  const activeCustomers = customers.filter(c => c.status === 'accepted').length;
+  const totalBalance = customers.reduce((sum, c) => sum + (c.balance || 0), 0);
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-100 text-green-800">Aktif</Badge>;
-      case 'inactive':
-        return <Badge className="bg-gray-100 text-gray-800">Tidak Aktif</Badge>;
-      case 'banned':
-        return <Badge className="bg-red-100 text-red-800">Diblokir</Badge>;
-      default:
-        return null;
-    }
+    const statusMap = {
+      pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800' },
+      accepted: { label: 'Aktif', className: 'bg-green-100 text-green-800' },
+      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-800' },
+      suspended: { label: 'Ditangguhkan', className: 'bg-gray-100 text-gray-800' }
+    };
+    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.pending;
+    return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
   };
 
   return (
@@ -145,7 +127,7 @@ export const AdminCustomers: React.FC = () => {
               <div>
                 <p className="text-sm opacity-60">Total Transaksi</p>
                 <p className="text-3xl mt-2">
-                  Rp {(totalRevenue / 1000000).toFixed(1)}jt
+                  Rp {(totalBalance / 1000000).toFixed(1)}jt
                 </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -185,9 +167,10 @@ export const AdminCustomers: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="active">Aktif</SelectItem>
-                <SelectItem value="inactive">Tidak Aktif</SelectItem>
-                <SelectItem value="banned">Diblokir</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="accepted">Aktif</SelectItem>
+                <SelectItem value="rejected">Ditolak</SelectItem>
+                <SelectItem value="suspended">Ditangguhkan</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -199,15 +182,22 @@ export const AdminCustomers: React.FC = () => {
                 <TableRow>
                   <TableHead>Customer</TableHead>
                   <TableHead>Kontak</TableHead>
-                  <TableHead>Total Pesanan</TableHead>
-                  <TableHead>Total Belanja</TableHead>
+                  <TableHead>Alamat</TableHead>
+                  <TableHead>Saldo</TableHead>
                   <TableHead>Bergabung</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCustomers.length === 0 ? (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="w-8 h-8 border-2 border-[#FF7A00]/30 border-t-[#FF7A00] rounded-full animate-spin mx-auto"></div>
+                      <p className="text-gray-500 mt-4">Memuat data...</p>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredCustomers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                       Tidak ada data customer
@@ -219,6 +209,9 @@ export const AdminCustomers: React.FC = () => {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar>
+                            {customer.profilePhoto ? (
+                              <AvatarImage src={customer.profilePhoto} alt={customer.name} />
+                            ) : null}
                             <AvatarFallback className="bg-blue-100 text-blue-800">
                               {customer.name.charAt(0)}
                             </AvatarFallback>
@@ -234,44 +227,44 @@ export const AdminCustomers: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-2 opacity-70">
                             <Phone className="h-3 w-3" />
-                            {customer.phone}
+                            {customer.phoneNumber}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{customer.totalOrders} pesanan</TableCell>
-                      <TableCell>Rp {customer.totalSpent.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="max-w-xs truncate">{customer.address}</TableCell>
+                      <TableCell>Rp {(customer.balance || 0).toLocaleString('id-ID')}</TableCell>
                       <TableCell>
-                        {new Date(customer.joinDate).toLocaleDateString('id-ID')}
+                        {new Date(customer.createdAt).toLocaleDateString('id-ID')}
                       </TableCell>
-                      <TableCell>{getStatusBadge(customer.status)}</TableCell>
+                      <TableCell>{getStatusBadge(customer.status || 'pending')}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedCustomer(customer)}
+                            onClick={() => navigate(`/admin/user-detail/customers/${customer.id}`)}
                           >
-                            <Eye className="h-4 w-4" />
+                            <CheckCircle className="h-4 w-4" />
                           </Button>
-                          {customer.status !== 'banned' ? (
+                          {customer.status === 'accepted' ? (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleToggleStatus(customer.id, 'banned')}
+                              onClick={() => handleToggleStatus(customer.id, 'suspended')}
                               className="hover:bg-red-50 hover:text-red-600"
                             >
                               <Ban className="h-4 w-4" />
                             </Button>
-                          ) : (
+                          ) : customer.status === 'suspended' ? (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleToggleStatus(customer.id, 'active')}
+                              onClick={() => handleToggleStatus(customer.id, 'accepted')}
                               className="hover:bg-green-50 hover:text-green-600"
                             >
                               <CheckCircle className="h-4 w-4" />
                             </Button>
-                          )}
+                          ) : null}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -283,58 +276,6 @@ export const AdminCustomers: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Customer Detail Modal */}
-      {selectedCustomer && (
-        <Dialog open={!!selectedCustomer} onOpenChange={() => setSelectedCustomer(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Detail Customer</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-blue-100 text-blue-800 text-2xl">
-                    {selectedCustomer.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-lg">{selectedCustomer.name}</h3>
-                  {getStatusBadge(selectedCustomer.status)}
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-4 border-t">
-                <div className="flex justify-between">
-                  <span className="opacity-60">Email</span>
-                  <span>{selectedCustomer.email}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Telepon</span>
-                  <span>{selectedCustomer.phone}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Total Pesanan</span>
-                  <span>{selectedCustomer.totalOrders} pesanan</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Total Belanja</span>
-                  <span>Rp {selectedCustomer.totalSpent.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Bergabung Sejak</span>
-                  <span>
-                    {new Date(selectedCustomer.joinDate).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };

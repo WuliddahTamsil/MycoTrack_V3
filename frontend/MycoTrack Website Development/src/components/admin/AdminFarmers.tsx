@@ -1,210 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Edit, Trash2, Eye } from 'lucide-react';
-import { SensorChart } from '../shared/SensorChart';
-import { mockFarmers, mockProducts, mockOrders, generateMockSensorData } from '../mockData';
-import { toast } from 'sonner@2.0.3';
+import { Edit, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = 'http://localhost:3000/api';
+
+interface Farmer {
+  id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'suspended';
+  createdAt: string;
+  shop?: {
+    name: string;
+    description: string;
+    photo?: string;
+  };
+  farm?: {
+    landArea: number;
+    landPhoto?: string;
+    mushroomType: string;
+    rackCount: number;
+    baglogCount: number;
+    harvestCapacity: number;
+  };
+  balance?: number;
+}
 
 export const AdminFarmers: React.FC = () => {
-  const [farmers, setFarmers] = useState(mockFarmers);
-  const [selectedFarmer, setSelectedFarmer] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [farmers, setFarmers] = useState<Farmer[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDeleteFarmer = (farmerId: string) => {
-    if (confirm('Apakah Anda yakin ingin menghapus petani ini?')) {
-      setFarmers(farmers.filter(f => f.id !== farmerId));
-      toast.success('Petani berhasil dihapus');
+  useEffect(() => {
+    fetchFarmers();
+  }, []);
+
+  const fetchFarmers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/admin/users/petanis`);
+      if (!response.ok) throw new Error('Failed to fetch farmers');
+      const data = await response.json();
+      setFarmers(data.petanis || []);
+    } catch (error: any) {
+      console.error('Error fetching farmers:', error);
+      toast.error('Gagal memuat data petani');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const selectedFarmerData = farmers.find(f => f.id === selectedFarmer);
-  const farmerProducts = mockProducts.filter(p => p.farmerId === selectedFarmer);
-  const farmerOrders = mockOrders.filter(o => o.farmerId === selectedFarmer);
-  const farmerSensorData = selectedFarmer ? generateMockSensorData(selectedFarmer, 7) : [];
+  const handleDeleteFarmer = async (farmerId: string) => {
+    if (confirm('Apakah Anda yakin ingin menghapus petani ini?')) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/users/petanis/${farmerId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminEmail: 'admin' })
+        });
+        if (!response.ok) throw new Error('Failed to delete farmer');
+      toast.success('Petani berhasil dihapus');
+        fetchFarmers();
+      } catch (error: any) {
+        console.error('Error deleting farmer:', error);
+        toast.error('Gagal menghapus petani');
+      }
+    }
+  };
 
-  if (selectedFarmer && selectedFarmerData) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 style={{ color: 'var(--secondary-dark-red)' }}>Detail Petani: {selectedFarmerData.name}</h2>
-            <p style={{ color: 'var(--neutral-gray)' }}>
-              {selectedFarmerData.email} • {selectedFarmerData.phone}
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => setSelectedFarmer(null)}>
-            Kembali
-          </Button>
-        </div>
+  const getStatusBadge = (status: string) => {
+    const statusMap = {
+      pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800' },
+      accepted: { label: 'Diterima', className: 'bg-green-100 text-green-800' },
+      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-800' },
+      suspended: { label: 'Ditangguhkan', className: 'bg-gray-100 text-gray-800' }
+    };
+    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.pending;
+    return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
+  };
 
-        <Tabs defaultValue="monitoring">
-          <TabsList>
-            <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-            <TabsTrigger value="products">Produk & Penjualan</TabsTrigger>
-            <TabsTrigger value="profile">Profil & Keuangan</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="monitoring" className="space-y-6">
-            <SensorChart
-              data={farmerSensorData.slice(-24)}
-              title="Data Sensor 24 Jam Terakhir"
-              showTemperature={true}
-              showHumidity={true}
-            />
-            <Card>
-              <CardHeader>
-                <CardTitle>Galeri Foto Budidaya</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4">
-                  <img 
-                    src="https://images.unsplash.com/photo-1735282260417-cb781d757604?w=300" 
-                    alt="Growth"
-                    className="rounded-lg w-full h-40 object-cover"
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1735282260412-59db284b82ad?w=300" 
-                    alt="Growth"
-                    className="rounded-lg w-full h-40 object-cover"
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1552825897-bb5efa86eab1?w=300" 
-                    alt="Growth"
-                    className="rounded-lg w-full h-40 object-cover"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="products" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Daftar Produk</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nama Produk</TableHead>
-                      <TableHead>Kategori</TableHead>
-                      <TableHead>Harga</TableHead>
-                      <TableHead>Stok</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {farmerProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>{product.name}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>Rp {product.price.toLocaleString('id-ID')}</TableCell>
-                        <TableCell>{product.stock} {product.unit}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Riwayat Penjualan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID Pesanan</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {farmerOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell>{order.id.toUpperCase()}</TableCell>
-                        <TableCell>{order.customerName}</TableCell>
-                        <TableCell>Rp {order.total.toLocaleString('id-ID')}</TableCell>
-                        <TableCell>
-                          <Badge className={order.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
-                            {order.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{new Date(order.createdAt).toLocaleDateString('id-ID')}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informasi Profil</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm mb-1" style={{ color: 'var(--neutral-gray)' }}>Nama</p>
-                    <p>{selectedFarmerData.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm mb-1" style={{ color: 'var(--neutral-gray)' }}>Email</p>
-                    <p>{selectedFarmerData.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm mb-1" style={{ color: 'var(--neutral-gray)' }}>Telepon</p>
-                    <p>{selectedFarmerData.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm mb-1" style={{ color: 'var(--neutral-gray)' }}>Lokasi</p>
-                    <p>{selectedFarmerData.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm mb-1" style={{ color: 'var(--neutral-gray)' }}>Bergabung</p>
-                    <p>{new Date(selectedFarmerData.joinedAt).toLocaleDateString('id-ID')}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm mb-1" style={{ color: 'var(--neutral-gray)' }}>Status</p>
-                    <Badge className={selectedFarmerData.status === 'online' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                      {selectedFarmerData.status}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Ringkasan Keuangan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span style={{ color: 'var(--neutral-gray)' }}>Total Penjualan</span>
-                    <span style={{ color: 'var(--primary-orange)' }}>
-                      Rp {selectedFarmerData.totalSales.toLocaleString('id-ID')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: 'var(--neutral-gray)' }}>Total Produk</span>
-                    <span>{selectedFarmerData.totalProducts} produk</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -220,15 +101,25 @@ export const AdminFarmers: React.FC = () => {
           <CardTitle>Daftar Petani</CardTitle>
         </CardHeader>
         <CardContent>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-2 border-[#FF7A00]/30 border-t-[#FF7A00] rounded-full animate-spin mx-auto"></div>
+              <p className="text-[#5A4A32] mt-4">Memuat data...</p>
+            </div>
+          ) : farmers.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              Tidak ada data petani
+            </div>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nama</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Lokasi</TableHead>
+                  <TableHead>No. HP</TableHead>
+                  <TableHead>Alamat</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Total Produk</TableHead>
-                <TableHead>Total Penjualan</TableHead>
+                  <TableHead>Toko</TableHead>
                 <TableHead>Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -237,24 +128,17 @@ export const AdminFarmers: React.FC = () => {
                 <TableRow key={farmer.id}>
                   <TableCell>{farmer.name}</TableCell>
                   <TableCell>{farmer.email}</TableCell>
-                  <TableCell>{farmer.location}</TableCell>
-                  <TableCell>
-                    <Badge className={farmer.status === 'online' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                      {farmer.status === 'online' ? 'Online' : 'Offline'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{farmer.totalProducts}</TableCell>
-                  <TableCell>Rp {farmer.totalSales.toLocaleString('id-ID')}</TableCell>
+                    <TableCell>{farmer.phoneNumber}</TableCell>
+                    <TableCell className="max-w-xs truncate">{farmer.address}</TableCell>
+                    <TableCell>{getStatusBadge(farmer.status || 'pending')}</TableCell>
+                    <TableCell>{farmer.shop?.name || '-'}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setSelectedFarmer(farmer.id)}
+                        onClick={() => navigate(`/admin/user-detail/petanis/${farmer.id}`)}
                       >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -271,6 +155,7 @@ export const AdminFarmers: React.FC = () => {
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
     </div>

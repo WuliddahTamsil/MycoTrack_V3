@@ -1,84 +1,134 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Check, Trash2, Package, DollarSign, AlertCircle, TrendingUp, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { useAuth } from '../AuthContext';
+import { toast } from 'sonner';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 interface Notification {
   id: string;
-  type: 'order' | 'payment' | 'alert' | 'info' | 'forum';
+  userId: string;
+  type: 'new_order' | 'order_status' | 'payment' | 'alert' | 'info' | 'forum';
   title: string;
   message: string;
-  time: string;
+  orderId?: string | null;
   read: boolean;
-  icon: React.ElementType;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'order',
-    title: 'Pesanan Baru',
-    message: 'Anda menerima pesanan baru sebanyak 5kg Jamur Kuping dari Toko Segar Jaya',
-    time: '5 menit yang lalu',
-    read: false,
-    icon: Package
-  },
-  {
-    id: '2',
-    type: 'alert',
-    title: 'Peringatan Suhu',
-    message: 'Suhu ruangan baglog #3 mencapai 32°C, segera lakukan penyesuaian',
-    time: '15 menit yang lalu',
-    read: false,
-    icon: AlertCircle
-  },
-  {
-    id: '3',
-    type: 'payment',
-    title: 'Pembayaran Diterima',
-    message: 'Pembayaran sebesar Rp 450.000 telah masuk ke saldo Anda',
-    time: '1 jam yang lalu',
-    read: true,
-    icon: DollarSign
-  },
-  {
-    id: '4',
-    type: 'info',
-    title: 'Kondisi Optimal',
-    message: 'Kelembaban pada ruang baglog #1 mencapai tingkat optimal (85%)',
-    time: '2 jam yang lalu',
-    read: true,
-    icon: TrendingUp
-  },
-  {
-    id: '5',
-    type: 'forum',
-    title: 'Komentar Baru di Forum',
-    message: 'Ada 3 balasan baru pada diskusi "Tips Budidaya Jamur Kuping"',
-    time: '3 jam yang lalu',
-    read: true,
-    icon: MessageCircle
-  },
-];
-
 export const Notifications: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [loading, setLoading] = useState(true);
 
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, read: true } : notif
-    ));
+  useEffect(() => {
+    if (user?.id) {
+      fetchNotifications();
+      // Poll for new notifications every 5 seconds
+      const interval = setInterval(() => {
+        fetchNotifications();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.id]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications?userId=${user?.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+  const markAsRead = async (id: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        setNotifications(notifications.map(notif => 
+          notif.id === id ? { ...notif, read: true } : notif
+        ));
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error('Gagal menandai notifikasi');
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter(n => !n.read);
+      await Promise.all(unreadNotifications.map(n => markAsRead(n.id)));
+      toast.success('Semua notifikasi ditandai sebagai sudah dibaca');
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
   };
 
   const deleteNotification = (id: string) => {
     setNotifications(notifications.filter(notif => notif.id !== id));
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'new_order':
+      case 'order_status':
+        return Package;
+      case 'payment':
+        return DollarSign;
+      case 'alert':
+        return AlertCircle;
+      case 'forum':
+        return MessageCircle;
+      default:
+        return TrendingUp;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'new_order':
+      case 'order_status':
+        return 'bg-blue-100 text-blue-800';
+      case 'payment':
+        return 'bg-green-100 text-green-800';
+      case 'alert':
+        return 'bg-red-100 text-red-800';
+      case 'forum':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Baru saja';
+    if (minutes < 60) return `${minutes} menit yang lalu`;
+    if (hours < 24) return `${hours} jam yang lalu`;
+    if (days < 7) return `${days} hari yang lalu`;
+    return date.toLocaleDateString('id-ID');
   };
 
   const filteredNotifications = activeTab === 'all' 
@@ -87,15 +137,16 @@ export const Notifications: React.FC = () => {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'order': return 'bg-blue-100 text-blue-800';
-      case 'payment': return 'bg-green-100 text-green-800';
-      case 'alert': return 'bg-red-100 text-red-800';
-      case 'forum': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <div className="w-8 h-8 border-2 border-[#FF7A00]/30 border-t-[#FF7A00] rounded-full animate-spin mx-auto"></div>
+          <p className="text-[#5A4A32] mt-4">Memuat notifikasi...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -142,60 +193,63 @@ export const Notifications: React.FC = () => {
                   <p>Tidak ada notifikasi</p>
                 </div>
               ) : (
-                filteredNotifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    className={`p-4 rounded-lg border transition-colors ${
-                      notif.read ? 'bg-white' : 'bg-orange-50 border-orange-200'
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div 
-                        className={`p-2 rounded-lg ${getTypeColor(notif.type)}`}
-                      >
-                        <notif.icon className="h-5 w-5" />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-sm">{notif.title}</h4>
-                              {!notif.read && (
-                                <Badge className="bg-[var(--primary-orange)] text-white px-2 py-0">
-                                  Baru
-                                </Badge>
-                              )}
+                filteredNotifications.map((notif) => {
+                  const IconComponent = getIcon(notif.type);
+                  return (
+                    <div
+                      key={notif.id}
+                      className={`p-4 rounded-lg border transition-colors ${
+                        notif.read ? 'bg-white' : 'bg-orange-50 border-orange-200'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div 
+                          className={`p-2 rounded-lg ${getTypeColor(notif.type)}`}
+                        >
+                          <IconComponent className="h-5 w-5" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="text-sm font-semibold">{notif.title}</h4>
+                                {!notif.read && (
+                                  <Badge className="bg-[var(--primary-orange)] text-white px-2 py-0">
+                                    Baru
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm opacity-70 mb-2">{notif.message}</p>
+                              <p className="text-xs opacity-50">{formatTime(notif.createdAt)}</p>
                             </div>
-                            <p className="text-sm opacity-70 mb-2">{notif.message}</p>
-                            <p className="text-xs opacity-50">{notif.time}</p>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            {!notif.read && (
+                            
+                            <div className="flex gap-2">
+                              {!notif.read && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => markAsRead(notif.id)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => markAsRead(notif.id)}
-                                className="h-8 w-8 p-0"
+                                onClick={() => deleteNotification(notif.id)}
+                                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
                               >
-                                <Check className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteNotification(notif.id)}
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </TabsContent>
           </Tabs>

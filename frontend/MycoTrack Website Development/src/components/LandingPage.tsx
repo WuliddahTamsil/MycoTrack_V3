@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Shell, TrendingUp, Zap, ChevronDown, Mail, Phone, MapPin, Instagram, MessageCircle, Sparkles, Activity, CheckCircle2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -7,11 +8,8 @@ import { Input } from './ui/input';
 import { mockArticles } from './mockData';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
-interface LandingPageProps {
-  onOpenAuth: () => void;
-}
-
-export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
+export const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -57,7 +55,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
             </nav>
             
             <Button 
-              onClick={onOpenAuth}
+              onClick={() => navigate('/login')}
               className="gradient-autumn-cta text-white hover-glow transition-all font-semibold shadow-lg"
             >
               <Sparkles className="h-4 w-4 mr-2" />

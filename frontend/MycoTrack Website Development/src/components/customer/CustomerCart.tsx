@@ -1,16 +1,17 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, Headphones } from 'lucide-react';
 import { useCart } from '../CartContext';
 import { toast } from 'sonner@2.0.3';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 interface CustomerCartProps {
   onNavigateToCheckout: () => void;
+  onNavigateToCustomerService?: () => void;
 }
 
-export const CustomerCart: React.FC<CustomerCartProps> = ({ onNavigateToCheckout }) => {
+export const CustomerCart: React.FC<CustomerCartProps> = ({ onNavigateToCheckout, onNavigateToCustomerService }) => {
   const { cart, removeFromCart, updateQuantity, getTotalPrice, getTotalItems } = useCart();
 
   const handleRemoveItem = (productId: string, productName: string) => {
@@ -31,11 +32,23 @@ export const CustomerCart: React.FC<CustomerCartProps> = ({ onNavigateToCheckout
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-[#B82601] font-bold">Keranjang Belanja</h2>
-        <p className="text-[#5A4A32] font-medium">
-          {getTotalItems()} item dalam keranjang Anda
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-[#B82601] font-bold">Keranjang Belanja</h2>
+          <p className="text-[#5A4A32] font-medium">
+            {getTotalItems()} item dalam keranjang Anda
+          </p>
+        </div>
+        {onNavigateToCustomerService && (
+          <Button
+            onClick={onNavigateToCustomerService}
+            variant="outline"
+            className="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00] hover:text-white"
+          >
+            <Headphones className="h-4 w-4 mr-2" />
+            Chat Customer Service
+          </Button>
+        )}
       </div>
 
       {cart.length === 0 ? (

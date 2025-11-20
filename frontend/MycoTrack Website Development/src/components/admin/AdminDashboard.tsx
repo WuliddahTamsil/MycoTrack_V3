@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '../shared/DashboardLayout';
-import { Home, Bell, Users, UserCheck, FileText, BarChart3, Settings } from 'lucide-react';
+import { Home, Bell, FileText, BarChart3, Settings, UserCog, MapPin, Headphones } from 'lucide-react';
 import { AdminHome } from './AdminHome';
-import { AdminFarmers } from './AdminFarmers';
 import { AdminContent } from './AdminContent';
-import { AdminCustomers } from './AdminCustomers';
 import { AdminAnalytics } from './AdminAnalytics';
 import { Notifications } from '../shared/Notifications';
 import { AccountSettings } from '../shared/AccountSettings';
+import { UserManagement } from './UserManagement';
+import { FarmerDistributionMap } from './FarmerDistributionMap';
+import { AdminCustomerService } from './AdminCustomerService';
 
-type AdminPage = 'home' | 'notifications' | 'farmers' | 'customers' | 'content' | 'analytics' | 'settings';
+type AdminPage = 'home' | 'notifications' | 'user-management' | 'content' | 'analytics' | 'farmer-distribution' | 'customer-service' | 'settings';
 
 export const AdminDashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<AdminPage>('home');
@@ -17,10 +18,11 @@ export const AdminDashboard: React.FC = () => {
   const menuItems = [
     { id: 'home' as AdminPage, icon: Home, label: 'Dashboard' },
     { id: 'notifications' as AdminPage, icon: Bell, label: 'Notifikasi' },
-    { id: 'farmers' as AdminPage, icon: Users, label: 'Manajemen Petani' },
-    { id: 'customers' as AdminPage, icon: UserCheck, label: 'Manajemen Customer' },
+    { id: 'user-management' as AdminPage, icon: UserCog, label: 'Manajemen User' },
+    { id: 'farmer-distribution' as AdminPage, icon: MapPin, label: 'Persebaran Petani' },
     { id: 'content' as AdminPage, icon: FileText, label: 'Manajemen Konten' },
     { id: 'analytics' as AdminPage, icon: BarChart3, label: 'Analitik Data' },
+    { id: 'customer-service' as AdminPage, icon: Headphones, label: 'Customer Service' },
     { id: 'settings' as AdminPage, icon: Settings, label: 'Pengaturan Akun' },
   ];
 
@@ -46,15 +48,17 @@ export const AdminDashboard: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <AdminHome />;
-      case 'farmers':
-        return <AdminFarmers />;
+        return <AdminHome onNavigate={(page: AdminPage) => setCurrentPage(page)} />;
+      case 'user-management':
+        return <UserManagement />;
+      case 'farmer-distribution':
+        return <FarmerDistributionMap />;
       case 'content':
         return <AdminContent />;
-      case 'customers':
-        return <AdminCustomers />;
       case 'analytics':
         return <AdminAnalytics />;
+      case 'customer-service':
+        return <AdminCustomerService />;
       case 'notifications':
         return <Notifications />;
       case 'settings':
