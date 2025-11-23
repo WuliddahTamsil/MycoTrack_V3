@@ -1,0 +1,11 @@
+[
+  {
+    "id": "admin-001",
+    "email": "adminmyc@gmail.com",
+    "password": "12345678",
+    "name": "Admin MycoTrack",
+    "role": "admin",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  }
+]
+

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "msg-1763655403950-cbjmbtpbx",
+    "conversationId": "conv-1763655403870-iundoz0d9",
+    "customerId": "customer-1763482547446",
+    "customerName": "Wuliddah Tamsil",
+    "adminId": null,
+    "adminName": null,
+    "sender": "customer",
+    "message": "hi",
+    "read": true,
+    "timestamp": "2025-11-20T16:16:43.950Z",
+    "createdAt": "2025-11-20T16:16:43.950Z"
+  },
+  {
+    "id": "msg-1763655439783-0x3pbrwuc",
+    "conversationId": "conv-1763655403870-iundoz0d9",
+    "customerId": "customer-1763482547446",
+    "customerName": "Wuliddah Tamsil",
+    "adminId": "admin-001",
+    "adminName": "Admin MycoTrack",
+    "sender": "admin",
+    "message": "halo",
+    "read": true,
+    "timestamp": "2025-11-20T16:17:19.784Z",
+    "createdAt": "2025-11-20T16:17:19.784Z"
+  },
+  {
+    "id": "msg-1763656150183-hgroboh2u",
+    "conversationId": "conv-1763655403870-iundoz0d9",
+    "customerId": "customer-1763482547446",
+    "customerName": "Wuliddah Tamsil",
+    "adminId": "admin-001",
+    "adminName": "Admin MycoTrack",
+    "sender": "admin",
+    "message": "ada yg bisa admin bantu?",
+    "read": true,
+    "timestamp": "2025-11-20T16:29:10.184Z",
+    "createdAt": "2025-11-20T16:29:10.184Z"
+  },
+  {
+    "id": "msg-1763656163171-sdguuksi9",
+    "conversationId": "conv-1763655403870-iundoz0d9",
+    "customerId": "customer-1763482547446",
+    "customerName": "Wuliddah Tamsil",
+    "adminId": null,
+    "adminName": null,
+    "sender": "customer",
+    "message": "ada min",
+    "read": true,
+    "timestamp": "2025-11-20T16:29:23.171Z",
+    "createdAt": "2025-11-20T16:29:23.171Z"
+  }
+]

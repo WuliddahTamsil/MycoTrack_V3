@@ -1,0 +1,15 @@
+names:
+- Fase Muda
+- Matang
+- primordia
+nc: 3
+roboflow:
+  license: CC BY 4.0
+  project: mushroom-detection-emhqk-g6rjm
+  url: https://universe.roboflow.com/test-for-robot-vision/mushroom-detection-emhqk-g6rjm/dataset/8
+  version: 8
+  workspace: test-for-robot-vision
+test: test/images
+train: train/images
+val: valid/images
+path: C:\Users\USER\Documents\SCHOOL STUFF\Semester 5\Pembelajaran Mesin\Project\dataset

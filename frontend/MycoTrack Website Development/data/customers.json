@@ -1,0 +1,16 @@
+[
+  {
+    "id": "customer-1763482547446",
+    "name": "Wuliddah Tamsil",
+    "email": "wuliddahtamsilbarokah19@gmail.com",
+    "password": "12345678",
+    "address": "Dusun Ciuyah RT/RW 09/03 Desa Ciniru Kecamatan Ciniru Kabupaten Kuningan Provinsi Jawa Barat",
+    "phoneNumber": "085294939357",
+    "profilePhoto": "http://localhost:3000/uploads/profilePhoto-1763482547413-624589583.jpg",
+    "role": "customer",
+    "balance": 0,
+    "status": "accepted",
+    "adminMessage": null,
+    "createdAt": "2025-11-18T16:15:47.446Z"
+  }
+]

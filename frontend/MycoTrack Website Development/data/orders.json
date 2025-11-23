@@ -1,0 +1,31 @@
+[
+  {
+    "id": "order-1763647474408-mugc94ud4",
+    "customerId": "customer-1763482547446",
+    "customerName": "Wuliddah Tamsil",
+    "farmerId": "petani-1763483912929",
+    "farmerName": "Petani1",
+    "products": [
+      {
+        "productId": "product-1763644610859",
+        "name": "Jamur Kuping",
+        "quantity": 1,
+        "price": 15000
+      }
+    ],
+    "total": 30000,
+    "status": "pending",
+    "paymentStatus": "pending",
+    "paymentMethod": "QRIS",
+    "shippingAddress": "Dusun Ciuyah RT/RW 09/03 Desa Ciniru Kecamatan Ciniru Kabupaten Kuningan Provinsi Jawa Barat",
+    "tracking": [
+      {
+        "status": "pending",
+        "message": "Pesanan dibuat",
+        "timestamp": "2025-11-20T14:04:34.408Z"
+      }
+    ],
+    "createdAt": "2025-11-20T14:04:34.409Z",
+    "updatedAt": "2025-11-20T14:04:34.409Z"
+  }
+]

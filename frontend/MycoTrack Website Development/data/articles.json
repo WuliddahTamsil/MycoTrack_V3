@@ -1,0 +1,27 @@
+[
+  {
+    "id": "a1",
+    "title": "Panduan Lengkap Budidaya Jamur Kuping untuk Pemula",
+    "excerpt": "Pelajari langkah-langkah mudah memulai budidaya jamur kuping dari nol hingga panen pertama.",
+    "content": "Artikel lengkap tentang budidaya jamur kuping untuk pemula. Mulai dari persiapan media tanam, inokulasi, inkubasi, hingga panen. Artikel ini akan membahas secara detail setiap tahapan budidaya jamur kuping dengan tips dan trik yang mudah dipahami.",
+    "image": "https://images.unsplash.com/photo-1735282260417-cb781d757604?w=400",
+    "author": "Dr. Agus Budiman",
+    "date": "2025-11-01",
+    "category": "Tutorial",
+    "createdAt": "2025-11-01T00:00:00.000Z",
+    "updatedAt": "2025-11-01T00:00:00.000Z"
+  },
+  {
+    "id": "a2",
+    "title": "Teknologi IoT dalam Budidaya Jamur Modern",
+    "excerpt": "Bagaimana sensor IoT membantu meningkatkan produktivitas dan kualitas jamur kuping.",
+    "content": "IoT mengubah cara budidaya jamur modern. Dengan sensor IoT, petani dapat memantau suhu, kelembaban, dan kondisi lingkungan secara real-time. Artikel ini membahas implementasi teknologi IoT dalam budidaya jamur kuping dan manfaatnya bagi produktivitas.",
+    "image": "https://images.unsplash.com/photo-1755719523098-227f4c486eb1?w=400",
+    "author": "Ir. Fitri Handayani",
+    "date": "2025-10-28",
+    "category": "Teknologi",
+    "createdAt": "2025-10-28T00:00:00.000Z",
+    "updatedAt": "2025-10-28T00:00:00.000Z"
+  }
+]
+
