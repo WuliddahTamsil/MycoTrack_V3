@@ -72,5 +72,29 @@
     "description": "Orderan masuk Jamur Kuping Super × 1 dari Wuliddah Tamsil pada 1 Des 2025",
     "id": "ledger-1764564615908-oipuz4a5d",
     "timestamp": "2025-12-01T04:50:15.908Z"
+  },
+  {
+    "type": "debit",
+    "userId": "customer-1763482547446",
+    "userType": "customer",
+    "amount": -38500,
+    "balanceBefore": 276500,
+    "balanceAfter": 238000,
+    "orderId": "order-1764611187047-uicbpb1m8",
+    "description": "Pembayaran pesanan Jamur Kering × 1 ke Petani2 pada 2 Des 2025",
+    "id": "ledger-1764611187218-60ddnkf3e",
+    "timestamp": "2025-12-01T17:46:27.218Z"
+  },
+  {
+    "type": "credit",
+    "userId": "petani-1763648620022",
+    "userType": "farmer",
+    "amount": 38500,
+    "balanceBefore": 0,
+    "balanceAfter": 38500,
+    "orderId": "order-1764611187047-uicbpb1m8",
+    "description": "Orderan masuk Jamur Kering × 1 dari Wuliddah Tamsil pada 2 Des 2025",
+    "id": "ledger-1764611187251-m18967gxv",
+    "timestamp": "2025-12-01T17:46:27.251Z"
   }
 ]

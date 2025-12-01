@@ -36,7 +36,7 @@
     "address": "Bogor Tengah Babakan",
     "ktpPhoto": "http://localhost:3000/uploads/ktpPhoto-1763648619941-525844106.png",
     "role": "petani",
-    "balance": 0,
+    "balance": 38500,
     "status": "accepted",
     "adminMessage": null,
     "shop": {

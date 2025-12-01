@@ -28,5 +28,15 @@
     "productCount": 1,
     "id": "analytics-1764564616140-brs5b3msy",
     "timestamp": "2025-12-01T04:50:16.140Z"
+  },
+  {
+    "eventType": "order_created",
+    "orderId": "order-1764611187047-uicbpb1m8",
+    "customerId": "customer-1763482547446",
+    "farmerId": "petani-1763648620022",
+    "amount": 38500,
+    "productCount": 1,
+    "id": "analytics-1764611187718-6sksko4eh",
+    "timestamp": "2025-12-01T17:46:27.718Z"
   }
 ]

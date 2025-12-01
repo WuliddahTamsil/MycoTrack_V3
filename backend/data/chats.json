@@ -102,5 +102,18 @@
     "read": true,
     "timestamp": "2025-11-22T13:02:08.297Z",
     "createdAt": "2025-11-22T13:02:08.297Z"
+  },
+  {
+    "id": "msg-1764607972469-tw03jyket",
+    "conversationId": "conv-1763655403870-iundoz0d9",
+    "customerId": "customer-1763482547446",
+    "customerName": "Wuliddah Tamsil",
+    "adminId": null,
+    "adminName": null,
+    "sender": "customer",
+    "message": "baiiinkjskhgduahdks",
+    "read": true,
+    "timestamp": "2025-12-01T16:52:52.469Z",
+    "createdAt": "2025-12-01T16:52:52.469Z"
   }
 ]

@@ -55,6 +55,7 @@
     },
     server: {
       port: 5173,
+      strictPort: true, // Jangan auto-increment ke port lain jika 5173 terpakai
       open: true,
       host: true,
     },

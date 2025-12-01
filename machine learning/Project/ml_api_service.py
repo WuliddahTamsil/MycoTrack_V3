@@ -351,12 +351,12 @@ if __name__ == '__main__':
     
     # Run Flask app
     print("\n" + "="*70)
-    print("🚀 ML Detection Service is starting...")
+    print("[INFO] ML Detection Service is starting...")
     print("="*70)
-    print(f"📍 Service URL: http://localhost:5000")
-    print(f"📍 Health check: http://localhost:5000/health")
+    print(f"[INFO] Service URL: http://localhost:5000")
+    print(f"[INFO] Health check: http://localhost:5000/health")
     print("="*70)
-    print("\n⚠️  IMPORTANT: Keep this window open while using detection feature!")
+    print("\n[WARNING] IMPORTANT: Keep this window open while using detection feature!")
     print("   Press CTRL+C to stop the service\n")
     print("="*70 + "\n")
     

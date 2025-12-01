@@ -3,11 +3,20 @@
   "version": "1.0.0",
   "description": "MycoTrack - Sistem Monitoring dan Manajemen Budidaya Jamur Kuping",
   "scripts": {
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm start",
-    "dev:ml": "cd \"machine learning/Project\" && python ml_api_service.py",
-    "build:frontend": "cd frontend && npm install && npm run build",
-    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "node scripts/start-backend.js",
+    "dev:ml": "node scripts/start-ml.js",
+    "dev:all": "concurrently --kill-others-on-fail --restart-tries 3 --restart-after 2000 --prefix \"[{name}]\" --names \"ml,backend,frontend\" --prefix-colors \"yellow,blue,green\" \"npm run dev:ml\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "test:services": "node scripts/test-services.js",
+    "kill:port": "node scripts/kill-port.js",
+    "kill:3000": "node scripts/kill-port.js 3000",
+    "kill:5000": "node scripts/kill-port.js 5000",
+    "kill:5173": "node scripts/kill-port.js 5173",
+    "kill:5175": "node scripts/kill-port.js 5175",
+    "kill:all": "node scripts/kill-port.js 3000 && node scripts/kill-port.js 5000 && node scripts/kill-port.js 5173 && node scripts/kill-port.js 5175",
+    "build:frontend": "npm install --prefix frontend && npm run build --prefix frontend",
+    "build:all": "npm run build:frontend",
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
     "deploy:vercel": "vercel --prod"
   },
   "keywords": [
@@ -19,6 +28,10 @@
     "machine-learning"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "npm-run-all": "^4.1.5"
+  }
 }
 
