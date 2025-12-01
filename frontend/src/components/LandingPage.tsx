@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Shell, TrendingUp, Zap, ChevronDown, Mail, Phone, MapPin, Instagram, MessageCircle, Sparkles, Activity, CheckCircle2, X, ChevronLeft, ChevronRight, HelpCircle, Wifi, Brain, CreditCard, DollarSign, Shield, Smartphone, BarChart3, Users, Clock, Settings, Globe } from 'lucide-react';
+import { ArrowRight, Shell, TrendingUp, Zap, ChevronDown, Mail, Phone, MapPin, Instagram, MessageCircle, Sparkles, Activity, CheckCircle2, X, ChevronLeft, ChevronRight, HelpCircle, Wifi, Brain, CreditCard, DollarSign, Shield, Smartphone, BarChart3, Users, Clock, Settings, Globe, Github } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { mockArticles } from './mockData';
@@ -145,6 +145,9 @@ export const LandingPage: React.FC = () => {
               <button onClick={() => scrollToSection('faq')} className="text-sm text-[#5A4A32] hover:text-[#B82601] transition-colors font-medium">
                 FAQ
               </button>
+              <button onClick={() => scrollToSection('team')} className="text-sm text-[#5A4A32] hover:text-[#B82601] transition-colors font-medium">
+                Tim
+              </button>
               <button onClick={() => scrollToSection('contact')} className="text-sm text-[#5A4A32] hover:text-[#B82601] transition-colors font-medium">
                 Kontak
               </button>
@@ -179,8 +182,11 @@ export const LandingPage: React.FC = () => {
                 <span className="text-sm text-[#B82601] font-semibold">Platform Monitoring Jamur Berbasis IoT & AI</span>
               </div>
               
-              <h1 className="mb-6 text-5xl md:text-7xl text-gradient-autumn font-bold">
-                MycoTrack
+              <h1 className="mb-6 text-5xl md:text-7xl text-gradient-autumn font-bold flex items-center gap-3 md:gap-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-xl gradient-autumn-hero flex items-center justify-center autumn-shadow flex-shrink-0">
+                  <Shell className="h-6 w-6 md:h-8 md:w-8 lg:h-10 lg:w-10 text-white" />
+                </div>
+                <span>MycoTrack</span>
               </h1>
               <p className="text-xl md:text-2xl mb-4 text-[#FF7A00] max-w-3xl font-bold">
                 Budidaya Jamur Kuping Lebih Cerdas dengan Teknologi Modern
@@ -469,20 +475,20 @@ export const LandingPage: React.FC = () => {
           {/* Header Section */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-sm autumn-shadow mb-8 animate-fade-in">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF7A00] to-[#E8A600] flex items-center justify-center">
-                <HelpCircle className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-white border-2 border-[#FF7A00] flex items-center justify-center">
+                <HelpCircle className="h-4 w-4 text-[#B82601]" />
               </div>
               <span className="text-sm font-bold text-[#B82601]">Pertanyaan Umum</span>
             </div>
             <div className="flex items-center justify-center gap-4 mb-6 animate-slide-up">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-[#FF7A00] to-[#E8A600] flex items-center justify-center shadow-lg">
-                <MessageCircle className="h-8 w-8 md:h-10 md:w-10 text-white" />
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border-2 border-[#FF7A00] flex items-center justify-center shadow-lg">
+                <MessageCircle className="h-8 w-8 md:h-10 md:w-10 text-[#B82601]" />
               </div>
               <h2 className="text-5xl md:text-6xl text-[#B82601] font-bold">
                 Pertanyaan yang Sering Diajukan
               </h2>
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-[#E8A600] to-[#9A7400] flex items-center justify-center shadow-lg">
-                <HelpCircle className="h-8 w-8 md:h-10 md:w-10 text-white" />
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border-2 border-[#FF7A00] flex items-center justify-center shadow-lg">
+                <HelpCircle className="h-8 w-8 md:h-10 md:w-10 text-[#B82601]" />
               </div>
             </div>
             <p className="text-xl text-[#5A4A32] font-medium max-w-3xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -692,6 +698,170 @@ export const LandingPage: React.FC = () => {
             >
               Selanjutnya
               <ChevronRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section id="team" className="py-24 relative bg-gradient-to-b from-[#FFF8F0] via-[#FFF4D4]/30 to-[#FFF8F0]">
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-[#FF7A00]/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-tr from-[#E8A600]/5 to-transparent rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Header Section */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-sm autumn-shadow mb-8 animate-fade-in">
+              <div className="w-8 h-8 rounded-full bg-white border-2 border-[#FF7A00] flex items-center justify-center">
+                <Users className="h-4 w-4 text-[#B82601]" />
+              </div>
+              <span className="text-sm font-bold text-[#B82601]">Tim Pengembang</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl mb-4 text-[#B82601] font-bold animate-slide-up">
+              Kenali Tim Kami
+            </h2>
+            <p className="text-lg text-[#5A4A32] max-w-2xl mx-auto font-medium animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              Tim profesional yang berdedikasi untuk menghadirkan solusi terbaik bagi petani jamur
+            </p>
+          </div>
+
+          {/* Team Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                name: 'Ariel Mughnika Beers',
+                role: 'Project Manager',
+                instagram: 'https://instagram.com/ariel_mughnika',
+                github: 'https://github.com/ariel-mughnika',
+                image: '/assets/team/ariel_myc.jpg',
+                gradient: 'from-[#B82601] to-[#FF7A00]',
+                delay: '0s'
+              },
+              {
+                name: 'Wuliddah Tamsil Barokah',
+                role: 'FullStack Developer + Deployment Specialist',
+                instagram: 'https://instagram.com/wuliddah_tamsil',
+                github: 'https://github.com/WuliddahTamsil',
+                image: '/assets/team/wuwu_myc.png',
+                gradient: 'from-[#B82601] to-[#FF7A00]',
+                delay: '0.1s'
+              },
+              {
+                name: 'Dwi Putra Kunto Anggoro',
+                role: 'Robot Designer + Data Analyst',
+                instagram: 'https://instagram.com/dwi_putra',
+                github: 'https://github.com/dwi-putra',
+                image: '/assets/team/kunto_myc.jpg',
+                gradient: 'from-[#B82601] to-[#FF7A00]',
+                delay: '0.2s'
+              },
+              {
+                name: 'Nabil Kurnia Rozano',
+                role: 'Requirement Engineer',
+                instagram: 'https://instagram.com/nabil_kurnia',
+                github: 'https://github.com/nabil-kurnia',
+                image: '/assets/team/nabil_myc.jpg',
+                gradient: 'from-[#B82601] to-[#FF7A00]',
+                delay: '0.3s'
+              }
+            ].map((member, idx) => (
+              <Card 
+                key={idx}
+                className="group relative autumn-card border-2 border-[#FF7A00]/20 rounded-3xl overflow-hidden autumn-card-hover bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 animate-slide-up"
+                style={{ animationDelay: member.delay }}
+              >
+                {/* Gradient Overlay on Hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${member.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`}></div>
+                
+                <CardContent className="p-6 relative z-10">
+                  {/* Photo Section */}
+                  <div className="relative mb-6 flex justify-center">
+                    <div className="relative w-32 h-32 z-10">
+                      {/* Decorative Ring - Behind */}
+                      <div className={`absolute -inset-2 rounded-full bg-gradient-to-br ${member.gradient} opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-300 -z-10`}></div>
+                      
+                      {/* Gradient Border Container */}
+                      <div className={`w-full h-full rounded-full bg-gradient-to-br ${member.gradient} p-1.5 shadow-lg`}>
+                        <div className="w-full h-full rounded-full bg-white overflow-hidden relative">
+                          <img
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover rounded-full"
+                            style={{ 
+                              display: 'block',
+                              position: 'relative',
+                              zIndex: 1
+                            }}
+                            loading="lazy"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent && !parent.querySelector('.fallback-initial')) {
+                                const fallback = document.createElement('div');
+                                fallback.className = `fallback-initial absolute inset-0 bg-gradient-to-br ${member.gradient} rounded-full flex items-center justify-center text-white text-4xl font-bold`;
+                                fallback.style.zIndex = '2';
+                                fallback.textContent = member.name.charAt(0);
+                                parent.appendChild(fallback);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Name & Role */}
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-[#B82601] mb-2 group-hover:text-[#FF7A00] transition-colors duration-300">
+                      {member.name}
+                    </h3>
+                    <div className={`inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-[#FFF4D4] to-[#FFE4CC] border-2 border-[#FF7A00] text-[#B82601] text-sm font-semibold shadow-md`}>
+                      {member.role}
+                    </div>
+                  </div>
+
+                  {/* Social Links */}
+                  <div className="flex items-center justify-center gap-4">
+                    <a
+                      href={member.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group/social w-12 h-12 rounded-xl bg-white border-2 border-[#FF7A00] flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-[#FF7A00]/10 transition-all duration-300 hover:scale-110 hover:rotate-3"
+                      aria-label={`Instagram ${member.name}`}
+                    >
+                      <Instagram className="h-5 w-5 text-[#B82601] group-hover/social:scale-110 group-hover/social:text-[#FF7A00] transition-all" />
+                    </a>
+                    <a
+                      href={member.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group/social w-12 h-12 rounded-xl bg-white border-2 border-[#FF7A00] flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-[#FF7A00]/10 transition-all duration-300 hover:scale-110 hover:rotate-3"
+                      aria-label={`GitHub ${member.name}`}
+                    >
+                      <Github className="h-5 w-5 text-[#B82601] group-hover/social:scale-110 group-hover/social:text-[#FF7A00] transition-all" />
+                    </a>
+                  </div>
+                </CardContent>
+
+                {/* Bottom Accent */}
+                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${member.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center mt-16 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <p className="text-lg text-[#5A4A32] font-medium mb-6">
+              Tertarik bergabung dengan tim kami?
+            </p>
+            <Button
+              onClick={() => scrollToSection('contact')}
+              className="gradient-autumn-cta text-white hover-glow transition-all font-semibold shadow-lg px-8 py-6 text-lg"
+            >
+              Hubungi Kami
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </div>
