@@ -25,7 +25,23 @@ try:
     from config import *
 except ImportError:
     # Default config jika config.py tidak ada
-    MODEL_PATH = "weights/best.pt"
+    # Cari file model yang tersedia
+    weights_dir = Path("weights")
+    model_candidates = [
+        weights_dir / "best.pt",
+        weights_dir / "best - Copy.pt",
+        weights_dir / "best-Copy.pt"
+    ]
+    
+    MODEL_PATH = None
+    for candidate in model_candidates:
+        if candidate.exists():
+            MODEL_PATH = str(candidate)
+            break
+    
+    if MODEL_PATH is None:
+        MODEL_PATH = "weights/best.pt"
+    
     CONFIDENCE_THRESHOLD = 0.40
     CLASS_NAMES = ['Primordia', 'Muda', 'Matang']
     HARVEST_ESTIMATION = {'Primordia': 4, 'Muda': 2, 'Matang': 0}
@@ -64,23 +80,42 @@ def load_model():
     """Load YOLOv5 model"""
     global model
     if model is None:
+        model_path_obj = Path(MODEL_PATH)
         print(f"[INFO] Loading model: {MODEL_PATH}")
-        if not Path(MODEL_PATH).exists():
+        print(f"[INFO] Model file exists: {model_path_obj.exists()}")
+        
+        if not model_path_obj.exists():
+            # Coba cari alternatif
+            weights_dir = model_path_obj.parent
+            print(f"[INFO] Searching for alternative model files in: {weights_dir}")
+            alt_files = list(weights_dir.glob("*.pt"))
+            if alt_files:
+                print(f"[INFO] Found alternative model files: {[f.name for f in alt_files]}")
+                print(f"[INFO] Try renaming one of these files to 'best.pt' or update config.py")
             raise FileNotFoundError(f"Model not found: {MODEL_PATH}")
+        
+        print(f"[INFO] Model file size: {model_path_obj.stat().st_size / (1024*1024):.2f} MB")
+        print(f"[INFO] Starting model load (this may take 10-30 seconds)...")
         
         try:
             model = torch.hub.load('ultralytics/yolov5', 'custom', 
                                   path=MODEL_PATH, force_reload=False)
             model.conf = CONFIDENCE_THRESHOLD
             model.iou = 0.45  # IoU threshold untuk NMS
-            print(f"[INFO] Model loaded successfully!")
+            print(f"[INFO] ✅ Model loaded successfully!")
+            print(f"[INFO] Model path: {MODEL_PATH}")
             print(f"[INFO] Confidence threshold: {CONFIDENCE_THRESHOLD}")
             print(f"[INFO] IoU threshold: 0.45")
             print(f"[INFO] Model classes: {model.names}")
             print(f"[INFO] Model device: {next(model.parameters()).device}")
         except Exception as e:
-            print(f"❌ Error loading model: {e}")
-            raise
+            error_msg = f"Error loading model: {str(e)}"
+            print(f"❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            raise Exception(f"Gagal memuat model: {error_msg}. Pastikan file model valid dan dependencies terinstall.")
+    else:
+        print(f"[INFO] Model already loaded")
     return model
 
 def base64_to_image(base64_string):
@@ -139,12 +174,16 @@ def draw_detections(image, detections):
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
+    """Health check endpoint - fast response, doesn't wait for model"""
+    model_status = 'loaded' if model is not None else 'loading'
     return jsonify({
         'status': 'healthy',
         'model_loaded': model is not None,
-        'model_path': MODEL_PATH
-    })
+        'model_status': model_status,
+        'model_path': MODEL_PATH,
+        'service': 'ML Detection API',
+        'port': 5000
+    }), 200
 
 @app.route('/detect', methods=['POST'])
 def detect():
@@ -177,24 +216,58 @@ def detect():
     }
     """
     try:
-        # Load model if not loaded
-        model = load_model()
+        # Check if model is loaded
+        if model is None:
+            print("[DETECT] Model not loaded, attempting to load...")
+            try:
+                load_model()
+            except Exception as e:
+                error_msg = f"Model tidak dapat di-load: {str(e)}"
+                print(f"[DETECT] ERROR: {error_msg}")
+                return jsonify({
+                    'success': False,
+                    'error': error_msg,
+                    'details': 'Pastikan file model ada di folder weights/ dan ML service sudah di-restart'
+                }), 500
         
         # Get request data
         data = request.get_json()
         if not data or 'image' not in data:
-            return jsonify({'error': 'Image data is required'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'Image data is required'
+            }), 400
         
         image_base64 = data['image']
         return_image = data.get('return_image', False)
         
         # Convert base64 to image
-        image = base64_to_image(image_base64)
+        try:
+            image = base64_to_image(image_base64)
+        except Exception as e:
+            error_msg = f"Gagal memproses gambar: {str(e)}"
+            print(f"[DETECT] ERROR: {error_msg}")
+            return jsonify({
+                'success': False,
+                'error': error_msg,
+                'details': 'Format gambar tidak valid atau corrupt'
+            }), 400
         
         # Run detection
         print(f"[DETECT] Running inference on image shape: {image.shape}")
-        results = model(image)
-        df = results.pandas().xyxy[0]
+        try:
+            results = model(image)
+            df = results.pandas().xyxy[0]
+        except Exception as e:
+            error_msg = f"Error saat menjalankan deteksi: {str(e)}"
+            print(f"[DETECT] ERROR: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({
+                'success': False,
+                'error': error_msg,
+                'details': 'Model mungkin tidak ter-load dengan benar atau gambar tidak valid'
+            }), 500
         
         print(f"[DETECT] Raw detections from model: {len(df)} detections")
         if len(df) > 0:
@@ -324,14 +397,41 @@ def detect_upload():
             'image_with_detections': image_base64
         })
         
+    except FileNotFoundError as e:
+        error_msg = str(e)
+        print(f"[DETECT] ERROR: {error_msg}")
+        return jsonify({
+            'success': False,
+            'error': error_msg,
+            'details': 'File model tidak ditemukan. Pastikan file model ada di folder weights/'
+        }), 500
     except Exception as e:
-        print(f"Error in detection: {e}")
+        error_msg = str(e)
+        print(f"[DETECT] ERROR: {error_msg}")
         import traceback
         traceback.print_exc()
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': error_msg,
+            'details': 'Terjadi error saat memproses deteksi. Cek log ML service untuk detail.'
         }), 500
+
+def load_model_async():
+    """Load model in background thread"""
+    import threading
+    def _load():
+        try:
+            print("[INFO] Starting model load in background...")
+            load_model()
+            print("[INFO] ✅ Model loaded successfully in background!")
+        except Exception as e:
+            print(f"[ERROR] Failed to load model in background: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    thread = threading.Thread(target=_load, daemon=True)
+    thread.start()
+    return thread
 
 if __name__ == '__main__':
     print("="*70)
@@ -341,24 +441,21 @@ if __name__ == '__main__':
     print(f"Confidence threshold: {CONFIDENCE_THRESHOLD}")
     print("="*70)
     
-    # Load model on startup
-    try:
-        load_model()
-        print("[INFO] Model loaded successfully!")
-    except Exception as e:
-        print(f"[ERROR] Failed to load model: {e}")
-        print("[WARNING] Service will start but detection will fail until model is available")
-    
-    # Run Flask app
+    # Start Flask app first (non-blocking)
     print("\n" + "="*70)
     print("[INFO] ML Detection Service is starting...")
     print("="*70)
     print(f"[INFO] Service URL: http://localhost:5000")
     print(f"[INFO] Health check: http://localhost:5000/health")
     print("="*70)
-    print("\n[WARNING] IMPORTANT: Keep this window open while using detection feature!")
+    print("\n[INFO] Model will be loaded in background...")
+    print("[WARNING] IMPORTANT: Keep this window open while using detection feature!")
     print("   Press CTRL+C to stop the service\n")
     print("="*70 + "\n")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Load model in background thread (non-blocking)
+    load_model_async()
+    
+    # Run Flask app (this will start immediately)
+    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
 

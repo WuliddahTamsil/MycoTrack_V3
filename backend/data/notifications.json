@@ -31,7 +31,8 @@
     "title": "Pesanan Baru",
     "message": "Anda mendapat pesanan baru dari Wuliddah Tamsil sebesar Rp 38.500",
     "orderId": "order-1764611187047-uicbpb1m8",
-    "read": false,
-    "createdAt": "2025-12-01T17:46:27.711Z"
+    "read": true,
+    "createdAt": "2025-12-01T17:46:27.711Z",
+    "updatedAt": "2025-12-02T03:27:38.447Z"
   }
 ]

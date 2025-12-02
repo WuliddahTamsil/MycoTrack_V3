@@ -290,7 +290,7 @@ app.post('/api/customer/register', upload.single('profilePhoto'), async (req, re
       profilePhoto: req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null,
       role: 'customer',
       balance: 0,
-      status: 'pending', // New users start as pending
+      status: 'accepted', // Customer langsung aktif setelah registrasi
       adminMessage: null, // Admin can add rejection reason
       createdAt: new Date().toISOString()
     };
@@ -373,19 +373,8 @@ app.post('/api/customer/login', async (req, res) => {
       return res.status(401).json({ error: 'Email atau password salah' });
     }
 
-    // Check user status - only accepted users can login
-    const status = customer.status || 'pending';
-    if (status !== 'accepted') {
-      console.log(`❌ Login failed: User status is "${status}", only "accepted" users can login`);
-      const message = status === 'pending' 
-        ? 'Akun Anda masih menunggu persetujuan admin. Silakan tunggu konfirmasi.'
-        : status === 'rejected'
-        ? `Akun Anda ditolak. ${customer.adminMessage || 'Silakan hubungi admin untuk informasi lebih lanjut.'}`
-        : status === 'suspended'
-        ? 'Akun Anda dinonaktifkan sementara. Silakan hubungi admin.'
-        : 'Akun Anda belum aktif. Silakan hubungi admin.';
-      return res.status(403).json({ error: message });
-    }
+    // REMOVED: Status check - semua customer bisa login langsung setelah registrasi
+    // Tidak ada lagi pengecekan status, semua customer bisa login
 
     const { password: _, ...customerResponse } = customer;
     console.log('✅ Login successful for:', customer.email);
@@ -462,7 +451,7 @@ app.post('/api/petani/register', upload.fields([
       ktpPhoto: req.files?.ktpPhoto?.[0] ? `http://localhost:3000/uploads/${req.files.ktpPhoto[0].filename}` : null,
       role: 'petani',
       balance: 0,
-      status: 'pending', // New users start as pending
+      status: 'accepted', // Petani langsung aktif setelah registrasi
       adminMessage: null, // Admin can add rejection reason
       shop: {
         name: shopName,
@@ -553,19 +542,8 @@ app.post('/api/petani/login', async (req, res) => {
       return res.status(401).json({ error: 'Email atau password salah' });
     }
 
-    // Check user status - only accepted users can login
-    const status = petani.status || 'pending';
-    if (status !== 'accepted') {
-      console.log(`❌ Login failed: User status is "${status}", only "accepted" users can login`);
-      const message = status === 'pending' 
-        ? 'Akun Anda masih menunggu persetujuan admin. Silakan tunggu konfirmasi.'
-        : status === 'rejected'
-        ? `Akun Anda ditolak. ${petani.adminMessage || 'Silakan hubungi admin untuk informasi lebih lanjut.'}`
-        : status === 'suspended'
-        ? 'Akun Anda dinonaktifkan sementara. Silakan hubungi admin.'
-        : 'Akun Anda belum aktif. Silakan hubungi admin.';
-      return res.status(403).json({ error: message });
-    }
+    // REMOVED: Status check - semua petani bisa login langsung setelah registrasi
+    // Tidak ada lagi pengecekan status, semua petani bisa login
 
     const { password: _, ...petaniResponse } = petani;
     console.log('✅ Login successful for:', petani.email);
@@ -3412,7 +3390,7 @@ app.post('/api/ml/detect', upload.single('image'), async (req, res) => {
           image: req.body.image,
           return_image: req.body.return_image || true
         }, {
-          timeout: 30000 // 30 seconds timeout
+          timeout: 60000 // 60 seconds timeout (lebih lama untuk pertama kali load model)
         });
         return res.json(response.data);
       }
@@ -3429,7 +3407,7 @@ app.post('/api/ml/detect', upload.single('image'), async (req, res) => {
     console.log('[ML DETECT] Sending to ML service:', `${ML_SERVICE_URL}/detect/upload`);
     const response = await axios.post(`${ML_SERVICE_URL}/detect/upload`, formData, {
       headers: formData.getHeaders(),
-      timeout: 30000 // 30 seconds timeout
+      timeout: 60000 // 60 seconds timeout (lebih lama untuk pertama kali load model)
     });
     
     console.log('[ML DETECT] ML service responded successfully');
@@ -3461,12 +3439,12 @@ app.post('/api/ml/detect', upload.single('image'), async (req, res) => {
     if (error.code === 'ECONNREFUSED') {
       errorMessage = 'ML service tidak dapat diakses';
       errorDetails = `Tidak dapat terhubung ke ${ML_SERVICE_URL}. Pastikan ML service berjalan.`;
-    } else if (error.code === 'ETIMEDOUT') {
+    } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
       errorMessage = 'ML service timeout';
-      errorDetails = 'ML service tidak merespons dalam waktu yang ditentukan.';
+      errorDetails = `ML service tidak merespons dalam 60 detik. Pastikan ML service berjalan dan model sudah ter-load. Cek terminal ML service untuk error.`;
     } else if (error.response) {
-      errorMessage = error.response.data?.error || 'ML service error';
-      errorDetails = error.response.data?.details || error.response.statusText;
+      errorMessage = error.response.data?.error || error.response.data?.message || 'ML service error';
+      errorDetails = error.response.data?.details || error.response.statusText || 'Cek log ML service untuk detail error';
     } else {
       errorMessage = error.message || 'ML detection service error';
     }

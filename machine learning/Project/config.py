@@ -12,8 +12,24 @@ from pathlib import Path
 # Project root
 PROJECT_ROOT = Path(__file__).parent.resolve()
 
-# Model path
-MODEL_PATH = str(PROJECT_ROOT / "weights" / "best.pt")
+# Model path - cari file model yang tersedia
+WEIGHTS_DIR = PROJECT_ROOT / "weights"
+MODEL_CANDIDATES = [
+    WEIGHTS_DIR / "best.pt",
+    WEIGHTS_DIR / "best - Copy.pt",
+    WEIGHTS_DIR / "best-Copy.pt"
+]
+
+# Cari file model yang ada
+MODEL_PATH = None
+for candidate in MODEL_CANDIDATES:
+    if candidate.exists():
+        MODEL_PATH = str(candidate)
+        break
+
+# Jika tidak ada, gunakan default
+if MODEL_PATH is None:
+    MODEL_PATH = str(WEIGHTS_DIR / "best.pt")
 
 # ============================================================
 # DETECTION CONFIGURATION
